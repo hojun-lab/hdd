@@ -1,0 +1,20 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: hikari-deep-dive-mysql
+    ports:
+      - "13306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: pooltest
+      MYSQL_USER: pooluser
+      MYSQL_PASSWORD: poolpass
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max_connections=200
+    volumes:
+      - hikari-mysql-data:/var/lib/mysql
+
+volumes:
+  hikari-mysql-data:
