@@ -2,7 +2,7 @@
 
 > Learner: deepnoid
 > Started: 2026-03-24
-> Current: Week 1, Day 3
+> Current: Week 1, Day 4
 
 ## Week 1: Foundations (Build: NaivePool)
 
@@ -10,7 +10,7 @@
 |-----|-------|--------|-------|------|-------|
 | D1 | TCP/IP cost of DB connections | DEEP | COMPLETE | 2026-03-24 | avg=22ms, p50=17ms, p99=100ms, max=358ms. 서버측 비용 > 네트워크 비용 이해 |
 | D2 | JDBC driver internals | DEEP | COMPLETE | 2026-03-24 | v0 baseline: 349 req/sec (50t), 250t에서 Too many connections 1773건 실패 |
-| D3 | Connection pool lifecycle | - | - | - | - |
+| D3 | Connection pool lifecycle | DEEP | COMPLETE | 2026-03-25 | v1: pool=10 → 4769 req/sec, pool=50 → 2521 req/sec. v0 대비 13.6배. 풀 작을수록 빠름 발견 |
 | D4 | HikariCP vs alternatives | - | - | - | - |
 | D5 | HikariCP architecture | - | - | - | - |
 | Mission | Lifecycle diagram + Benchmark report | - | - | - | - |
@@ -42,7 +42,7 @@
 | Version | Description | Status | Benchmark Result |
 |---------|-------------|--------|-----------------|
 | v0 | No pool (baseline) | COMPLETE | 50t/100i: 349 req/sec, 14.3s, 0 fail. 250t/200i: 230 req/sec, 217s, 1773 fail |
-| v1 | ArrayList + synchronized | - | - |
+| v1 | ArrayList + synchronized | COMPLETE | pool=10: 4769 req/sec, pool=50: 2521 req/sec (50t/100i) |
 | v2 | Lock-free / ThreadLocal | - | - |
 | v3 | + timeout + leak detection + metrics | - | - |
 | v4 | + maxLifetime + validation | - | - |
@@ -61,6 +61,10 @@
 | DriverManager 내부 흐름 (acceptsURL → connect) | DEEP | D2 | 2026-03-24 |
 | connection.close() = 소켓 종료 + 서버 스레드 해제 | DEEP | D2 | 2026-03-24 |
 | max_connections 초과 시 Too many connections 에러 | DEEP | D2 | 2026-03-24 |
+| 커넥션 풀 = 재사용으로 생성 비용 제거 | DEEP | D3 | 2026-03-25 |
+| synchronized로 레이스 컨디션 방지 | DEEP | D3 | 2026-03-25 |
+| 풀 사이즈 ≠ 클수록 좋음 (초기화 비용 + 경합) | DEEP | D3 | 2026-03-25 |
+| 커넥션 점유 시간이 짧으면 소수 커넥션으로 다수 스레드 감당 가능 | DEEP | D3 | 2026-03-25 |
 
 > Theory Status: DEEP / SURFACE / NEEDS-REVIEW / NOT-STARTED
 > Build Status: COMPLETE / IN-PROGRESS / NOT-STARTED
