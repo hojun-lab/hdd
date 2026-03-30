@@ -15,12 +15,12 @@ public class Main {
     public static void main(String[] args) {
         long startTime = System.nanoTime();
         ConnectionInfo ci = ConnectionInfo.mysql();
-        loadTestNoPool(ci, 250, 200);
+        loadTestNoPool(ci, 50, 100);
         long endTime = System.nanoTime();
 
-        System.out.println("Total call: 250 * 200 --> " + (250 * 200));
+        System.out.println("Total call: 250 * 200 --> " + (50 * 100));
         System.out.println("Total execution time: " + TimeUnit.NANOSECONDS.toMillis(endTime - startTime));
-        System.out.println("Throughput per Second: " + (250.0 * 200.0) / ((endTime - startTime) / 1_000_000_000.0));
+        System.out.println("Throughput per Second: " + (50.0 * 100.0) / ((endTime - startTime) / 1_000_000_000.0));
     }
 
     private static void loadTestNoPool(ConnectionInfo info, int threadCount, int iterationsPerThread) {
