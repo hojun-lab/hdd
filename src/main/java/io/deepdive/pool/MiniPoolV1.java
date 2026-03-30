@@ -4,13 +4,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
 
-public class MiniPool {
+public class MiniPoolV1 {
     private final ConnectionInfo connectionInfo;
     private final int poolSize;
 
     ArrayList<Connection> connectionStore = new ArrayList<>();
 
-    public MiniPool(ConnectionInfo connectionInfo, int poolSize) {
+    public MiniPoolV1(ConnectionInfo connectionInfo, int poolSize) {
         this.connectionInfo = connectionInfo;
         this.poolSize = poolSize;
 

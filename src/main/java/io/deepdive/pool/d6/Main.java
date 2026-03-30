@@ -1,9 +1,9 @@
-package io.deepdive.pool.d3;
+package io.deepdive.pool.d6;
 
 import io.deepdive.pool.ConnectionInfo;
-import io.deepdive.pool.MiniPoolV1;
+import io.deepdive.pool.MiniPoolV2;
+import io.deepdive.pool.PoolEntity;
 
-import java.sql.Connection;
 import java.sql.Statement;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,17 +27,17 @@ public class Main {
     private static void loadTestNoPool(ConnectionInfo info, int threadCount, int iterationsPerThread) {
         AtomicInteger failCount = new AtomicInteger(0);
         ExecutorService es = Executors.newFixedThreadPool(threadCount);
-        MiniPoolV1 miniPool = new MiniPoolV1(info, 10);
+        MiniPoolV2 miniPoolV2 = new MiniPoolV2(info, 10);
 
         for (int i = 0; i < threadCount; i++) {
             es.submit(() -> {
                 for (int j = 0; j < iterationsPerThread; j++) {
                     try {
-                        Connection connection = miniPool.getConnection();
-                        Statement statement = connection.createStatement();
+                        PoolEntity connection = miniPoolV2.getConnection();
+                        Statement statement = connection.connection().createStatement();
                         statement.execute("SELECT 1");
                         statement.close();
-                        miniPool.release(connection);
+                        miniPoolV2.release(connection);
                     } catch (Exception e) {
                         failCount.incrementAndGet();
                         System.out.println(e.getMessage());

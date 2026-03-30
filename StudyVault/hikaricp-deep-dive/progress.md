@@ -2,7 +2,7 @@
 
 > Learner: deepnoid
 > Started: 2026-03-24
-> Current: Week 1, Day 5
+> Current: Week 2, Day 2
 
 ## Week 1: Foundations (Build: NaivePool)
 
@@ -19,7 +19,7 @@
 
 | Day | Topic | Theory | Build | Date | Notes |
 |-----|-------|--------|-------|------|-------|
-| D1 | ConcurrentBag deep-dive | - | - | - | - |
+| D1 | ConcurrentBag deep-dive | DEEP | COMPLETE | 2026-03-30 | v1: 6714/sec 69%실패, v2(CAS): 7044/sec 69%실패. 동기화 방식보다 대기 메커니즘이 핵심 |
 | D2 | Connection acquisition flow | - | - | - | - |
 | D3 | Core config parameters | - | - | - | - |
 | D4 | Leak detection & validation | - | - | - | - |
@@ -43,7 +43,7 @@
 |---------|-------------|--------|-----------------|
 | v0 | No pool (baseline) | COMPLETE | 50t/100i: 349 req/sec, 14.3s, 0 fail. 250t/200i: 230 req/sec, 217s, 1773 fail |
 | v1 | ArrayList + synchronized | COMPLETE | pool=10: 4769 req/sec, pool=50: 2521 req/sec (50t/100i) |
-| v2 | Lock-free / ThreadLocal | - | - |
+| v2 | Lock-free / ThreadLocal | IN-PROGRESS | 50t/1000i: 7044 req/sec, 34392 fail (69%). 대기 메커니즘 미구현 |
 | v3 | + timeout + leak detection + metrics | - | - |
 | v4 | + maxLifetime + validation | - | - |
 | Final | vs HikariCP benchmark | - | - |
@@ -73,6 +73,10 @@
 | isValid()로 stale 커넥션 사전 차단 | SURFACE | D5 | 2026-03-27 |
 | release 시 핸드오프 vs 풀 반환 분기 | SURFACE | D5 | 2026-03-27 |
 | ArrayDeque: 양끝 O(1) vs ArrayList.remove(0) O(n) | DEEP | D5 | 2026-03-27 |
+| PoolEntry + AtomicInteger로 커넥션 상태 관리 | DEEP | W2D1 | 2026-03-30 |
+| CAS(compareAndSet): 확인+변경을 원자적으로 | DEEP | W2D1 | 2026-03-30 |
+| CAS 없이 get()+set() 분리하면 레이스 컨디션 발생 | DEEP | W2D1 | 2026-03-30 |
+| ThreadLocal + CAS만으로는 부족 — 대기 메커니즘 필수 | DEEP | W2D1 | 2026-03-30 |
 
 > Theory Status: DEEP / SURFACE / NEEDS-REVIEW / NOT-STARTED
 > Build Status: COMPLETE / IN-PROGRESS / NOT-STARTED
