@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MiniPoolV2 {
@@ -12,10 +14,12 @@ public class MiniPoolV2 {
 
     List<PoolEntity> sharedList = new ArrayList<>();
     ThreadLocal<PoolEntity> lastUsed = new ThreadLocal<>();
+    Semaphore semaphore;
 
     public MiniPoolV2(ConnectionInfo connectionInfo, int poolSize) {
         this.connectionInfo = connectionInfo;
         this.poolSize = poolSize;
+        semaphore = new Semaphore(poolSize);
 
         for (int i = 0; i < poolSize; i++) {
             try {
@@ -27,7 +31,12 @@ public class MiniPoolV2 {
         }
     }
 
-    public PoolEntity getConnection() {
+    public PoolEntity getConnection(long timeoutMs) {
+        try {
+            if (!semaphore.tryAcquire(timeoutMs, TimeUnit.MILLISECONDS)) throw new RuntimeException();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         PoolEntity poolEntity = lastUsed.get();
         if (poolEntity != null && poolEntity.state().compareAndSet(0, 1)) {
             return poolEntity;
@@ -45,5 +54,6 @@ public class MiniPoolV2 {
 
     public void release(PoolEntity poolEntity) {
         poolEntity.state().set(0);
+        semaphore.release();
     }
 }

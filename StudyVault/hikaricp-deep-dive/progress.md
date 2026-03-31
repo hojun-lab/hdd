@@ -2,7 +2,7 @@
 
 > Learner: deepnoid
 > Started: 2026-03-24
-> Current: Week 2, Day 2
+> Current: Week 2, Day 3
 
 ## Week 1: Foundations (Build: NaivePool)
 
@@ -20,7 +20,7 @@
 | Day | Topic | Theory | Build | Date | Notes |
 |-----|-------|--------|-------|------|-------|
 | D1 | ConcurrentBag deep-dive | DEEP | COMPLETE | 2026-03-30 | v1: 6714/sec 69%실패, v2(CAS): 7044/sec 69%실패. 동기화 방식보다 대기 메커니즘이 핵심 |
-| D2 | Connection acquisition flow | - | - | - | - |
+| D2 | Connection acquisition flow | DEEP | COMPLETE | 2026-03-31 | Semaphore 대기 추가: 실패 69%→0%. timeout 30s vs 100ms 트레이드오프 확인 |
 | D3 | Core config parameters | - | - | - | - |
 | D4 | Leak detection & validation | - | - | - | - |
 | D5 | Metrics & monitoring | - | - | - | - |
@@ -43,7 +43,7 @@
 |---------|-------------|--------|-----------------|
 | v0 | No pool (baseline) | COMPLETE | 50t/100i: 349 req/sec, 14.3s, 0 fail. 250t/200i: 230 req/sec, 217s, 1773 fail |
 | v1 | ArrayList + synchronized | COMPLETE | pool=10: 4769 req/sec, pool=50: 2521 req/sec (50t/100i) |
-| v2 | Lock-free / ThreadLocal | IN-PROGRESS | 50t/1000i: 7044 req/sec, 34392 fail (69%). 대기 메커니즘 미구현 |
+| v2 | Lock-free / ThreadLocal + Semaphore | COMPLETE | CAS only: 7044/sec 69%실패. +Semaphore(30s): 3602/sec 0%실패. +Semaphore(100ms): 3195/sec 7%실패 |
 | v3 | + timeout + leak detection + metrics | - | - |
 | v4 | + maxLifetime + validation | - | - |
 | Final | vs HikariCP benchmark | - | - |
@@ -77,6 +77,9 @@
 | CAS(compareAndSet): 확인+변경을 원자적으로 | DEEP | W2D1 | 2026-03-30 |
 | CAS 없이 get()+set() 분리하면 레이스 컨디션 발생 | DEEP | W2D1 | 2026-03-30 |
 | ThreadLocal + CAS만으로는 부족 — 대기 메커니즘 필수 | DEEP | W2D1 | 2026-03-30 |
+| Semaphore: tryAcquire(timeout)로 시간 기반 대기 | DEEP | W2D2 | 2026-03-31 |
+| polling(busy wait) vs blocking(Semaphore/wait) 차이 | DEEP | W2D2 | 2026-03-31 |
+| connectionTimeout 트레이드오프: 느린 성공 vs 빠른 실패 | DEEP | W2D2 | 2026-03-31 |
 
 > Theory Status: DEEP / SURFACE / NEEDS-REVIEW / NOT-STARTED
 > Build Status: COMPLETE / IN-PROGRESS / NOT-STARTED

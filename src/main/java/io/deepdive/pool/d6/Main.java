@@ -33,7 +33,7 @@ public class Main {
             es.submit(() -> {
                 for (int j = 0; j < iterationsPerThread; j++) {
                     try {
-                        PoolEntity connection = miniPoolV2.getConnection();
+                        PoolEntity connection = miniPoolV2.getConnection(100);
                         Statement statement = connection.connection().createStatement();
                         statement.execute("SELECT 1");
                         statement.close();
