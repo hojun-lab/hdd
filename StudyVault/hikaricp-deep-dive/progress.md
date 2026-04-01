@@ -2,7 +2,7 @@
 
 > Learner: deepnoid
 > Started: 2026-03-24
-> Current: Week 2, Day 3
+> Current: Week 2, Day 4
 
 ## Week 1: Foundations (Build: NaivePool)
 
@@ -21,7 +21,7 @@
 |-----|-------|--------|-------|------|-------|
 | D1 | ConcurrentBag deep-dive | DEEP | COMPLETE | 2026-03-30 | v1: 6714/sec 69%실패, v2(CAS): 7044/sec 69%실패. 동기화 방식보다 대기 메커니즘이 핵심 |
 | D2 | Connection acquisition flow | DEEP | COMPLETE | 2026-03-31 | Semaphore 대기 추가: 실패 69%→0%. timeout 30s vs 100ms 트레이드오프 확인 |
-| D3 | Core config parameters | - | - | - | - |
+| D3 | Core config parameters | DEEP | COMPLETE | 2026-04-01 | pool=10 최적(8124/sec). 2배 올려도 2배 안 됨. connections=core×2 공식. PoolConfig 분리 |
 | D4 | Leak detection & validation | - | - | - | - |
 | D5 | Metrics & monitoring | - | - | - | - |
 | Mission | Config defense + Benchmark report | - | - | - | - |
@@ -80,6 +80,10 @@
 | Semaphore: tryAcquire(timeout)로 시간 기반 대기 | DEEP | W2D2 | 2026-03-31 |
 | polling(busy wait) vs blocking(Semaphore/wait) 차이 | DEEP | W2D2 | 2026-03-31 |
 | connectionTimeout 트레이드오프: 느린 성공 vs 빠른 실패 | DEEP | W2D2 | 2026-03-31 |
+| maximumPoolSize: 올려도 선형 성능 향상 아님 (DB CPU 병목) | DEEP | W2D3 | 2026-04-01 |
+| 공식: connections = core_count × 2 + spindle_count | DEEP | W2D3 | 2026-04-01 |
+| minimumIdle = maximumPoolSize 권장 이유 (콜드스타트 방지) | DEEP | W2D3 | 2026-04-01 |
+| maxLifetime: stale 커넥션 + DNS failover 방지 | SURFACE | W2D3 | 2026-04-01 |
 
 > Theory Status: DEEP / SURFACE / NEEDS-REVIEW / NOT-STARTED
 > Build Status: COMPLETE / IN-PROGRESS / NOT-STARTED
