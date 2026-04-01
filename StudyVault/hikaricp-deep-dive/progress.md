@@ -2,7 +2,7 @@
 
 > Learner: deepnoid
 > Started: 2026-03-24
-> Current: Week 2, Day 4
+> Current: Week 2, Day 5
 
 ## Week 1: Foundations (Build: NaivePool)
 
@@ -22,7 +22,7 @@
 | D1 | ConcurrentBag deep-dive | DEEP | COMPLETE | 2026-03-30 | v1: 6714/sec 69%실패, v2(CAS): 7044/sec 69%실패. 동기화 방식보다 대기 메커니즘이 핵심 |
 | D2 | Connection acquisition flow | DEEP | COMPLETE | 2026-03-31 | Semaphore 대기 추가: 실패 69%→0%. timeout 30s vs 100ms 트레이드오프 확인 |
 | D3 | Core config parameters | DEEP | COMPLETE | 2026-04-01 | pool=10 최적(8124/sec). 2배 올려도 2배 안 됨. connections=core×2 공식. PoolConfig 분리 |
-| D4 | Leak detection & validation | - | - | - | - |
+| D4 | Leak detection & validation | DEEP | COMPLETE | 2026-04-01 | Leak Detector 구현: Throwable 캡처 + ScheduledExecutor + ConcurrentHashMap. 반복 경고 개선 과제 |
 | D5 | Metrics & monitoring | - | - | - | - |
 | Mission | Config defense + Benchmark report | - | - | - | - |
 
@@ -44,7 +44,7 @@
 | v0 | No pool (baseline) | COMPLETE | 50t/100i: 349 req/sec, 14.3s, 0 fail. 250t/200i: 230 req/sec, 217s, 1773 fail |
 | v1 | ArrayList + synchronized | COMPLETE | pool=10: 4769 req/sec, pool=50: 2521 req/sec (50t/100i) |
 | v2 | Lock-free / ThreadLocal + Semaphore | COMPLETE | CAS only: 7044/sec 69%실패. +Semaphore(30s): 3602/sec 0%실패. +Semaphore(100ms): 3195/sec 7%실패 |
-| v3 | + timeout + leak detection + metrics | - | - |
+| v3 | + timeout + leak detection + metrics | IN-PROGRESS | Semaphore timeout + LeakDetector 완료. Metrics W2D5에서 추가 |
 | v4 | + maxLifetime + validation | - | - |
 | Final | vs HikariCP benchmark | - | - |
 
@@ -84,6 +84,9 @@
 | 공식: connections = core_count × 2 + spindle_count | DEEP | W2D3 | 2026-04-01 |
 | minimumIdle = maximumPoolSize 권장 이유 (콜드스타트 방지) | DEEP | W2D3 | 2026-04-01 |
 | maxLifetime: stale 커넥션 + DNS failover 방지 | SURFACE | W2D3 | 2026-04-01 |
+| Leak Detection: getConnection() 시점에 Throwable 캡처 | DEEP | W2D4 | 2026-04-01 |
+| ScheduledExecutorService로 주기적 감시 | DEEP | W2D4 | 2026-04-01 |
+| ConcurrentHashMap으로 빌려간 커넥션 추적 | DEEP | W2D4 | 2026-04-01 |
 
 > Theory Status: DEEP / SURFACE / NEEDS-REVIEW / NOT-STARTED
 > Build Status: COMPLETE / IN-PROGRESS / NOT-STARTED
