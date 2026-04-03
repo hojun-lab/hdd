@@ -18,6 +18,10 @@ public class MiniPoolV2 {
     List<PoolEntity> sharedList = new ArrayList<>();
     ThreadLocal<PoolEntity> lastUsed = new ThreadLocal<>();
     ConcurrentHashMap<PoolEntity, LeakInfo> map = new ConcurrentHashMap<>();
+    AtomicInteger active =  new AtomicInteger(0);
+    AtomicInteger idle =  new AtomicInteger(0);
+    AtomicInteger pending =  new AtomicInteger(0);
+    AtomicInteger total =  new AtomicInteger(0);
     Semaphore semaphore;
 
     public MiniPoolV2(ConnectionInfo connectionInfo, PoolConfig poolConfig) {
@@ -25,17 +29,22 @@ public class MiniPoolV2 {
         this.poolConfig = poolConfig;
         semaphore = new Semaphore(poolConfig.maximumPoolSize());
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
-        scheduledExecutorService.scheduleAtFixedRate(() -> {map.forEach((poolEntity, leakInfo) -> {
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            System.out.printf("[Pool] active=%d idle=%d pending=%d total=%d%n",
+                    active.get(), idle.get(), pending.get(), total.get());
+        }, 1, 1, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(() -> map.forEach((poolEntity, leakInfo) -> {
                 if (System.currentTimeMillis() - leakInfo.borrowTime() > poolConfig.leakDetectionThresholdMs()) {
                     log.warn("에러 발생");
                     leakInfo.borrowTrace().printStackTrace();
-                }});
-            }, 1, 1, TimeUnit.SECONDS);
+                }}), 1, 1, TimeUnit.SECONDS);
 
         for (int i = 0; i < poolConfig.maximumPoolSize(); i++) {
             try {
                 Connection connection = DriverManager.getConnection(connectionInfo.jdbcUrl(), connectionInfo.user(), connectionInfo.password());
                 sharedList.add(new PoolEntity(connection, new AtomicInteger(0)));
+                total.incrementAndGet();
+                idle.incrementAndGet();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -43,6 +52,7 @@ public class MiniPoolV2 {
     }
 
     public PoolEntity getConnection(long timeoutMs) {
+        pending.incrementAndGet();
         Throwable throwable = new Throwable();
         try {
             if (!semaphore.tryAcquire(timeoutMs, TimeUnit.MILLISECONDS)) throw new RuntimeException();
@@ -52,6 +62,9 @@ public class MiniPoolV2 {
         PoolEntity poolEntity = lastUsed.get();
         if (poolEntity != null && poolEntity.state().compareAndSet(0, 1)) {
             map.put(poolEntity, new LeakInfo(throwable, System.currentTimeMillis()));
+            pending.decrementAndGet();
+            active.incrementAndGet();
+            idle.decrementAndGet();
             return poolEntity;
         }
 
@@ -59,6 +72,9 @@ public class MiniPoolV2 {
             if (loopPoolEntity.state().compareAndSet(0, 1)) {
                 map.put(loopPoolEntity, new LeakInfo(throwable, System.currentTimeMillis()));
                 lastUsed.set(loopPoolEntity);
+                pending.decrementAndGet();
+                active.incrementAndGet();
+                idle.decrementAndGet();
                 return loopPoolEntity;
             }
         }
@@ -69,6 +85,8 @@ public class MiniPoolV2 {
     public void release(PoolEntity poolEntity) {
         map.remove(poolEntity);
         poolEntity.state().set(0);
+        active.decrementAndGet();
+        idle.incrementAndGet();
         semaphore.release();
     }
 }
