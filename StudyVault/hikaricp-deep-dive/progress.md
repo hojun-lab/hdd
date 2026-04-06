@@ -2,7 +2,7 @@
 
 > Learner: deepnoid
 > Started: 2026-03-24
-> Current: Week 3, Day 1
+> Current: Week 3, Day 2
 
 ## Week 1: Foundations (Build: NaivePool)
 
@@ -30,7 +30,7 @@
 
 | Day | Topic | Theory | Build | Date | Notes |
 |-----|-------|--------|-------|------|-------|
-| D1 | Connection exhaustion | - | - | - | - |
+| D1 | Connection exhaustion | DEEP | COMPLETE | 2026-04-06 | 3가지 고갈 시나리오 재현: 느린쿼리(5초 고정→회복), 트래픽폭증(빠르게 소화), 누수(영구 고갈+Leak경고) |
 | D2 | Deadlock & pool starvation | - | - | - | - |
 | D3 | maxLifetime vs infra timeout | - | - | - | - |
 | D4 | Multi-datasource routing | - | - | - | - |
@@ -90,6 +90,9 @@
 | 풀 메트릭: active/idle/pending/total | DEEP | W2D5 | 2026-04-03 |
 | 메트릭만으로는 근본 원인 파악 불가 (느린쿼리 vs 누수 vs 폭증) | DEEP | W2D5 | 2026-04-03 |
 | pending 급증 = 풀 고갈 신호 → 알림 설정 필요 | DEEP | W2D5 | 2026-04-03 |
+| 고갈 3패턴: 느린쿼리(일시→회복), 트래픽(빠른소화), 누수(영구고갈) | DEEP | W3D1 | 2026-04-06 |
+| 누수 = active가 절대 안 내려감 + Leak Detector 경고 | DEEP | W3D1 | 2026-04-06 |
+| 메트릭 패턴으로 고갈 원인 구분하는 방법 | DEEP | W3D1 | 2026-04-06 |
 
 > Theory Status: DEEP / SURFACE / NEEDS-REVIEW / NOT-STARTED
 > Build Status: COMPLETE / IN-PROGRESS / NOT-STARTED
