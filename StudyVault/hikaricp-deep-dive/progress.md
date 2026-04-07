@@ -13,7 +13,7 @@
 | D3 | Connection pool lifecycle | DEEP | COMPLETE | 2026-03-25 | v1: pool=10 → 4769 req/sec, pool=50 → 2521 req/sec. v0 대비 13.6배. 풀 작을수록 빠름 발견 |
 | D4 | HikariCP vs alternatives | DEEP | COMPLETE | 2026-03-26 | ThreadLocal+CAS vs synchronized 이해. v1 한계: 50t→80%실패, 200t→99%실패. 대기 메커니즘 부재 |
 | D5 | HikariCP architecture | DEEP | COMPLETE | 2026-03-27 | v2 설계 완료: ThreadLocal→공유풀→대기→타임아웃 4단계 폴백. release 핸드오프 설계 |
-| Mission | Lifecycle diagram + Benchmark report | - | - | - | - |
+| Mission | Lifecycle diagram + Benchmark report | DEEP | COMPLETE | 2026-04-06 | diagram.md에 제출. stateDiagram + 벤치마크 5종 비교 완료 |
 
 ## Week 2: Internals & Tuning (Build: OptimizedPool)
 
