@@ -15,7 +15,7 @@ public class Main {
         long startTime = System.nanoTime();
         ConnectionInfo ci = ConnectionInfo.mysql();
         int threadCount = 50;
-        int iterCount = 1000;
+        int iterCount = 100;
         loadTestNoPool(ci, threadCount, iterCount);
         long endTime = System.nanoTime();
 
@@ -36,6 +36,7 @@ public class Main {
                         Connection connection = miniPool.getConnection();
                         Statement statement = connection.createStatement();
                         statement.execute("SELECT 1");
+                        Thread.sleep(100);
                         statement.close();
                         miniPool.release(connection);
                     } catch (Exception e) {

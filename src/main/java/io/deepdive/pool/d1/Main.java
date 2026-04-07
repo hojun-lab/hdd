@@ -22,10 +22,10 @@ public class Main {
         for (int i = 0; i < 50; i++) {
             // warm-up loop
             try {
-                long startTime = System.nanoTime();
+                long startTime = System.currentTimeMillis();
                 Connection connection = DriverManager.getConnection(info.jdbcUrl(), info.user(), info.password());
                 connection.close();
-                long endTime = System.nanoTime();
+                long endTime = System.currentTimeMillis();
                 results[i] = endTime - startTime;
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -33,10 +33,10 @@ public class Main {
         }
         for (int i = 0; i < iterations; i++) {
             try {
-                long startTime = System.nanoTime();
+                long startTime = System.currentTimeMillis();
                 Connection connection = DriverManager.getConnection(info.jdbcUrl(), info.user(), info.password());
                 connection.close();
-                long endTime = System.nanoTime();
+                long endTime = System.currentTimeMillis();
                 results[i] = endTime - startTime;
             } catch (SQLException e) {
                 throw new RuntimeException(e);

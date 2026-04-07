@@ -2,7 +2,7 @@
 
 > Learner: deepnoid
 > Started: 2026-03-24
-> Current: Week 3, Day 2
+> Current: Week 3, Day 3
 
 ## Week 1: Foundations (Build: NaivePool)
 
@@ -31,7 +31,7 @@
 | Day | Topic | Theory | Build | Date | Notes |
 |-----|-------|--------|-------|------|-------|
 | D1 | Connection exhaustion | DEEP | COMPLETE | 2026-04-06 | 3가지 고갈 시나리오 재현: 느린쿼리(5초 고정→회복), 트래픽폭증(빠르게 소화), 누수(영구 고갈+Leak경고) |
-| D2 | Deadlock & pool starvation | - | - | - | - |
+| D2 | Deadlock & pool starvation | DEEP | COMPLETE | 2026-04-06 | REQUIRES_NEW 데드락 재현: pool=2, 2스레드×2커넥션 → active=2 pending=2 영구 고정. 방지법 3가지 |
 | D3 | maxLifetime vs infra timeout | - | - | - | - |
 | D4 | Multi-datasource routing | - | - | - | - |
 | D5 | Performance tuning | - | - | - | - |
@@ -93,6 +93,9 @@
 | 고갈 3패턴: 느린쿼리(일시→회복), 트래픽(빠른소화), 누수(영구고갈) | DEEP | W3D1 | 2026-04-06 |
 | 누수 = active가 절대 안 내려감 + Leak Detector 경고 | DEEP | W3D1 | 2026-04-06 |
 | 메트릭 패턴으로 고갈 원인 구분하는 방법 | DEEP | W3D1 | 2026-04-06 |
+| REQUIRES_NEW → 중첩 커넥션 → 풀 데드락 | DEEP | W3D2 | 2026-04-06 |
+| 데드락 메트릭: active=N, pending=N (같은 수) | DEEP | W3D2 | 2026-04-06 |
+| 데드락 방지: REQUIRES_NEW 금지 / 풀사이즈 공식 / 별도 풀 | DEEP | W3D2 | 2026-04-06 |
 
 > Theory Status: DEEP / SURFACE / NEEDS-REVIEW / NOT-STARTED
 > Build Status: COMPLETE / IN-PROGRESS / NOT-STARTED
