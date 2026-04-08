@@ -15,7 +15,7 @@ public class Main {
     public static void main(String[] args) {
         long startTime = System.nanoTime();
         ConnectionInfo ci = ConnectionInfo.mysql();
-        PoolConfig poolConfig = new PoolConfig(20, 30000, 1000);
+        PoolConfig poolConfig = new PoolConfig(20, 30000, 1000, 5000);
         int threadCount = 50;
         int iterCount = 1000;
         loadTestNoPool(ci, threadCount, iterCount, poolConfig);

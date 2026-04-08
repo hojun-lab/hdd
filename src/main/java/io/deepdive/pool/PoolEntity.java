@@ -5,5 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public record PoolEntity(
    Connection connection,
-   AtomicInteger state // 0 = NOT_IN_USE, 1 = IN_USE
+   AtomicInteger state, // 0 = NOT_IN_USE, 1 = IN_USE
+   long createdMillis,
+   long maxLifetimeWithJitter
 ) {}

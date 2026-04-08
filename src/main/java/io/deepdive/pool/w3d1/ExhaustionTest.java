@@ -71,7 +71,7 @@ public class ExhaustionTest {
 //        executorService2.awaitTermination(60, TimeUnit.SECONDS);
 
         System.out.println("\n=== Scenario 3: Connection Leak ===");
-        PoolConfig poolConfig2 = new PoolConfig(10, 5000, 2000);
+        PoolConfig poolConfig2 = new PoolConfig(10, 5000, 2000, 5000);
         MiniPoolV2 miniPool2 = new MiniPoolV2(ci, poolConfig2);
 
         ExecutorService executorService2 = Executors.newFixedThreadPool(20);

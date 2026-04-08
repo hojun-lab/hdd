@@ -8,7 +8,7 @@ import io.deepdive.pool.PoolEntity;
 public class Main {
     public static void main(String[] args) throws Exception {
         ConnectionInfo ci = ConnectionInfo.mysql();
-        PoolConfig poolConfig = new PoolConfig(10, 30000, 2000);
+        PoolConfig poolConfig = new PoolConfig(10, 30000, 2000, 5000);
         MiniPoolV2 pool = new MiniPoolV2(ci, poolConfig);
 
         System.out.println("=== Leak Detection Test ===");

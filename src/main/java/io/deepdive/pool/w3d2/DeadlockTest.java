@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 public class DeadlockTest {
     public static void main(String[] args) {
         ConnectionInfo connectionInfo = ConnectionInfo.mysql();
-        PoolConfig poolConfig = new PoolConfig(2, 5000, 2000);
+        PoolConfig poolConfig = new PoolConfig(2, 5000, 2000, 5000);
         MiniPoolV2 miniPoolV2 = new MiniPoolV2(connectionInfo, poolConfig);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 

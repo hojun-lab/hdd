@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -42,7 +43,8 @@ public class MiniPoolV2 {
         for (int i = 0; i < poolConfig.maximumPoolSize(); i++) {
             try {
                 Connection connection = DriverManager.getConnection(connectionInfo.jdbcUrl(), connectionInfo.user(), connectionInfo.password());
-                sharedList.add(new PoolEntity(connection, new AtomicInteger(0)));
+                long jitter = ThreadLocalRandom.current().nextLong(poolConfig.maxLifetimeMs() * 25 / 1000);
+                sharedList.add(new PoolEntity(connection, new AtomicInteger(0), System.currentTimeMillis(), poolConfig.maxLifetimeMs() + jitter));
                 total.incrementAndGet();
                 idle.incrementAndGet();
             } catch (Exception e) {
@@ -61,6 +63,7 @@ public class MiniPoolV2 {
         }
         PoolEntity poolEntity = lastUsed.get();
         if (poolEntity != null && poolEntity.state().compareAndSet(0, 1)) {
+            poolEntity = replaceConnection(poolEntity);
             map.put(poolEntity, new LeakInfo(throwable, System.currentTimeMillis()));
             pending.decrementAndGet();
             active.incrementAndGet();
@@ -70,6 +73,7 @@ public class MiniPoolV2 {
 
         for (PoolEntity loopPoolEntity : sharedList) {
             if (loopPoolEntity.state().compareAndSet(0, 1)) {
+                loopPoolEntity = replaceConnection(loopPoolEntity);
                 map.put(loopPoolEntity, new LeakInfo(throwable, System.currentTimeMillis()));
                 lastUsed.set(loopPoolEntity);
                 pending.decrementAndGet();
@@ -88,5 +92,24 @@ public class MiniPoolV2 {
         active.decrementAndGet();
         idle.incrementAndGet();
         semaphore.release();
+    }
+
+    private PoolEntity replaceConnection(PoolEntity old) {
+        if (old.createdMillis() + poolConfig.maxLifetimeMs() < System.currentTimeMillis()) {
+            Connection connection = null;
+            try {
+                old.connection().close();
+                connection = DriverManager.getConnection(connectionInfo.jdbcUrl(), connectionInfo.user(), connectionInfo.password());
+                long jitter = ThreadLocalRandom.current().nextLong(poolConfig.maxLifetimeMs() * 25 / 1000);
+                PoolEntity fresh = new PoolEntity(connection, new AtomicInteger(0), System.currentTimeMillis(), poolConfig.maxLifetimeMs() + jitter);
+                sharedList.remove(old);
+                sharedList.add(fresh);
+                System.out.println("[INFO] renew connection");
+                return fresh;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return old;
     }
 }
