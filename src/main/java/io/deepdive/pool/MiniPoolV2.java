@@ -89,15 +89,31 @@ public class MiniPoolV2 {
     public void release(PoolEntity poolEntity) {
         map.remove(poolEntity);
         poolEntity.state().set(0);
-        active.decrementAndGet();
-        idle.incrementAndGet();
-        semaphore.release();
+        try {
+            boolean valid = poolEntity.connection().isValid(1);
+            if (valid) {
+                active.decrementAndGet();
+                idle.incrementAndGet();
+                semaphore.release();
+            } else {
+                poolEntity.connection().close();
+                Connection connection = DriverManager.getConnection(connectionInfo.jdbcUrl(), connectionInfo.user(), connectionInfo.password());
+                long jitter = ThreadLocalRandom.current().nextLong(poolConfig.maxLifetimeMs() * 25 / 1000);
+                PoolEntity fresh = new PoolEntity(connection, new AtomicInteger(0), System.currentTimeMillis(), poolConfig.maxLifetimeMs() + jitter);
+                sharedList.remove(poolEntity);
+                sharedList.add(fresh);
+                semaphore.release();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private PoolEntity replaceConnection(PoolEntity old) {
-        if (old.createdMillis() + poolConfig.maxLifetimeMs() < System.currentTimeMillis()) {
-            Connection connection = null;
-            try {
+        try {
+            if (old.createdMillis() + old.maxLifetimeWithJitter() < System.currentTimeMillis() || !old.connection().isValid(1)) {
+                Connection connection = null;
+
                 old.connection().close();
                 connection = DriverManager.getConnection(connectionInfo.jdbcUrl(), connectionInfo.user(), connectionInfo.password());
                 long jitter = ThreadLocalRandom.current().nextLong(poolConfig.maxLifetimeMs() * 25 / 1000);
@@ -106,9 +122,9 @@ public class MiniPoolV2 {
                 sharedList.add(fresh);
                 System.out.println("[INFO] renew connection");
                 return fresh;
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return old;
     }

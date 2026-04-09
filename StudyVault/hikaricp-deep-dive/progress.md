@@ -2,7 +2,7 @@
 
 > Learner: deepnoid
 > Started: 2026-03-24
-> Current: Week 3, Day 4
+> Current: Week 3, Day 5
 
 ## Week 1: Foundations (Build: NaivePool)
 
@@ -33,7 +33,7 @@
 | D1 | Connection exhaustion | DEEP | COMPLETE | 2026-04-06 | 3가지 고갈 시나리오 재현: 느린쿼리(5초 고정→회복), 트래픽폭증(빠르게 소화), 누수(영구 고갈+Leak경고) |
 | D2 | Deadlock & pool starvation | DEEP | COMPLETE | 2026-04-06 | REQUIRES_NEW 데드락 재현: pool=2, 2스레드×2커넥션 → active=2 pending=2 영구 고정. 방지법 3가지 |
 | D3 | maxLifetime vs infra timeout | DEEP | COMPLETE | 2026-04-06 | maxLifetime < wait_timeout 필수. replaceConnection 구현. jitter로 동시만료 방지. renew 확인 |
-| D4 | Multi-datasource routing | - | - | - | - |
+| D4 | Multi-datasource routing | DEEP | COMPLETE | 2026-04-09 | isValid() 검증: borrow+return 양방향. 3중 방어(maxLifetime+isValid+LeakDetector). v4 완성 |
 | D5 | Performance tuning | - | - | - | - |
 | Mission | Incident diagnosis + MiniPool retrospective | - | - | - | - |
 
@@ -45,7 +45,7 @@
 | v1 | ArrayList + synchronized | COMPLETE | pool=10: 4769 req/sec, pool=50: 2521 req/sec (50t/100i) |
 | v2 | Lock-free / ThreadLocal + Semaphore | COMPLETE | CAS only: 7044/sec 69%실패. +Semaphore(30s): 3602/sec 0%실패. +Semaphore(100ms): 3195/sec 7%실패 |
 | v3 | + timeout + leak detection + metrics | COMPLETE | Semaphore timeout + LeakDetector + Metrics(active/idle/pending/total) 완료 |
-| v4 | + maxLifetime + validation | IN-PROGRESS | maxLifetime 구현 완료. isValid() W3D4에서 추가 |
+| v4 | + maxLifetime + validation | COMPLETE | maxLifetime(jitter포함) + isValid() borrow/return 양방향 검증 완료 |
 | Final | vs HikariCP benchmark | - | - |
 
 ## Concept Mastery
@@ -99,6 +99,9 @@
 | maxLifetime < DB wait_timeout 필수 (stale 커넥션 방지) | DEEP | W3D3 | 2026-04-06 |
 | 동시 만료 문제 → jitter로 만료 시점 분산 | DEEP | W3D3 | 2026-04-06 |
 | replaceConnection: 폐기 → 새 생성 → sharedList 교체 | DEEP | W3D3 | 2026-04-06 |
+| isValid() borrow-time vs return-time 트레이드오프 | DEEP | W3D4 | 2026-04-09 |
+| HikariCP는 return-time 검증 기본 (성능 우선) | DEEP | W3D4 | 2026-04-09 |
+| 3중 방어: maxLifetime + isValid + LeakDetector | DEEP | W3D4 | 2026-04-09 |
 
 > Theory Status: DEEP / SURFACE / NEEDS-REVIEW / NOT-STARTED
 > Build Status: COMPLETE / IN-PROGRESS / NOT-STARTED
